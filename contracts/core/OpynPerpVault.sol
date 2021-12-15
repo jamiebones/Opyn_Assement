@@ -13,6 +13,12 @@ import { IAction } from '../interfaces/IAction.sol';
 import { ICurve } from '../interfaces/ICurve.sol';
 import { IStakeDao } from '../interfaces/IStakeDao.sol';
 
+import {ILendingPool} from "@aave/protocol-v2/contracts/interfaces/ILendingPool.sol";
+
+
+ILendingPool constant lendingPool = ILendingPool(address(0x9FE532197ad76c5a68961439604C037EB79681F0)); // Kovan
+
+
 import "hardhat/console.sol";
 
 /**
@@ -207,26 +213,46 @@ contract OpynPerpVault is ERC20, ReentrancyGuard, Ownable {
    * @notice Deposits underlying into the contract and mint vault shares. 
    * @dev deposit into the curvePool, then into stakedao, then mint the shares to depositor, and emit the deposit event
    * @param amount amount of underlying to deposit 
-   * @param minCrvLPToken minimum amount of curveLPToken to get out from adding liquidity. 
+   *@param minCrvLPToken minimum amount of curveLPToken to get out from adding liquidity. 
    */
-  function depositUnderlying(uint256 amount, uint256 minCrvLPToken) external nonReentrant {
-    notEmergency();
-    actionsInitialized();
-    require(amount > 0, 'O6');
+ 
+  //added deposits function
+  // function deposit(uint256 amount ) external nonReentrant {
+  //   notEmergency();
+  //   actionsInitialized();
+  //   require(amount > 0, 'O6');
+  //   IERC20(underlying).safeTransferFrom(msg.sender, address(this), amount);
+  //   IERC20(underlying).safeApprove(address(lendingPool), amount);
+  //   lendingPool.deposit(underlying, amount, address(this), 0);
+  //   emit Deposit(msg.sender, msg.value, amount);
+  // }
 
-    // the sdToken is already deposited into the contract at this point, need to substract it from total
-    uint256[3] memory amounts;
-    amounts[0] = 0; // not depositing any rebBTC
-    amounts[1] = amount; 
-    amounts[2] = 0; 
+   function depositUnderlying(uint256 amount ) external nonReentrant {
+     notEmergency();
+     actionsInitialized();
+     require(amount > 0, 'O6');
+     IERC20(underlying).safeTransferFrom(msg.sender, address(this), amount);
+     IERC20(underlying).safeApprove(address(lendingPool), amount);
+     lendingPool.deposit(underlying, amount, address(this), 0);
+     emit Deposit(msg.sender, msg.value, amount);
+    // notEmergency();
+    // actionsInitialized();
+    // require(amount > 0, 'O6');
 
-    // deposit underlying to curvePool
-    IERC20 underlyingToken = IERC20(underlying);
-    underlyingToken.safeTransferFrom(msg.sender, address(this), amount);
-    underlyingToken.approve(address(curvePool), amount);
-    curvePool.add_liquidity(amounts, minCrvLPToken);
-    _depositToStakedaoAndMint();
+    // // the sdToken is already deposited into the contract at this point, need to substract it from total
+    // uint256[3] memory amounts;
+    // amounts[0] = 0; // not depositing any rebBTC
+    // amounts[1] = amount; 
+    // amounts[2] = 0; 
+
+    // // deposit underlying to curvePool
+    // IERC20 underlyingToken = IERC20(underlying);
+    // underlyingToken.safeTransferFrom(msg.sender, address(this), amount);
+    // underlyingToken.approve(address(curvePool), amount);
+    // curvePool.add_liquidity(amounts, minCrvLPToken);
+    // _depositToStakedaoAndMint();
   }
+
 
   /**
    * @notice Deposits curve LP into the contract and mint vault shares. 
@@ -241,7 +267,10 @@ contract OpynPerpVault is ERC20, ReentrancyGuard, Ownable {
     // deposit underlying to curvePool
     curveLPToken.safeTransferFrom(msg.sender, address(this), amount);
     _depositToStakedaoAndMint();
+    
   }
+
+  
 
   /**
    * @notice Withdraws underlying from vault using vault shares
@@ -388,6 +417,9 @@ contract OpynPerpVault is ERC20, ReentrancyGuard, Ownable {
   /*=====================
    * Internal functions *
    *====================*/
+ 
+
+
 
   function _depositToStakedaoAndMint() internal {
     // keep track of balance before

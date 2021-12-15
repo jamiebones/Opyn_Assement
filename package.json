@@ -30,6 +30,7 @@
     ]
   },
   "dependencies": {
+    "@aave/protocol-v2": "^1.0.1",
     "@airswap/utils": "^0.4.4",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",

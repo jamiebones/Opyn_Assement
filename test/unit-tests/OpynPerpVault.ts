@@ -109,7 +109,7 @@ describe('OpynPerpVault Tests', function () {
     })
 
     it('should not be able to deposit, withdraw, rollover or closePosition before actions are set', async() => {
-      await expect(vault.connect(depositor1).depositUnderlying('1', '1')).to.be.revertedWith('O1');
+      await expect(vault.connect(depositor1).depositUnderlying('1')).to.be.revertedWith('O1');
       await expect(vault.connect(depositor1).withdrawUnderlying('1', '1')).to.be.revertedWith('O1');
       await expect(vault.connect(owner).rollOver([4000, 5000])).to.be.revertedWith('O1');
       await expect(vault.connect(owner).closePositions()).to.be.revertedWith('O1');
@@ -149,7 +149,7 @@ describe('OpynPerpVault Tests', function () {
     const depositAmount = utils.parseUnits('10');
 
     it('should revert if calling depositUnderlying with no value', async () => {
-      await expect(vault.connect(depositor1).depositUnderlying('0', depositAmount)).to.be.revertedWith('O6');
+      await expect(vault.connect(depositor1).depositUnderlying(depositAmount)).to.be.revertedWith('O6');
     });
     it('p1 deposits wETH', async () => {
 
@@ -161,7 +161,7 @@ describe('OpynPerpVault Tests', function () {
       // depositor 1 deposit 10 eth
       await weth.connect(depositor1).deposit({value: depositAmount});
       await weth.connect(depositor1).approve(vault.address, depositAmount);
-      await vault.connect(depositor1).depositUnderlying(depositAmount, depositAmount);
+      await vault.connect(depositor1).depositUnderlying(depositAmount);
 
       const vaultTotalAfter = await vault.totalStakedaoAsset();
       const vaultBalanceAfter = await sdecrv.balanceOf(vault.address);
@@ -184,7 +184,7 @@ describe('OpynPerpVault Tests', function () {
       // depositor 1 deposit 10 eth
       await weth.connect(depositor1).deposit({value: depositAmount});
       await weth.connect(depositor1).approve(vault.address, depositAmount);
-      await vault.connect(depositor1).depositUnderlying(depositAmount, depositAmount);
+      await vault.connect(depositor1).depositUnderlying(depositAmount);
 
       const vaultTotalAfter = await vault.totalStakedaoAsset();
       const vaultBalanceAfter = await sdecrv.balanceOf(vault.address);
@@ -207,7 +207,7 @@ describe('OpynPerpVault Tests', function () {
       // depositor 2 deposit 10 eth
       await weth.connect(depositor2).deposit({value: depositAmount});
       await weth.connect(depositor2).approve(vault.address, depositAmount);
-      await vault.connect(depositor2).depositUnderlying(depositAmount, depositAmount);
+      await vault.connect(depositor2).depositUnderlying(depositAmount);
 
       const vaultTotalAfter = await vault.totalStakedaoAsset();
       const vaultBalanceAfter = await sdecrv.balanceOf(vault.address);
